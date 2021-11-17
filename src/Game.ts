@@ -23,10 +23,17 @@ export class Game {
         this.userInterface = userInterface;
         this.init();
 
-        this.userInterface.bindHandlers(this.changeDirection, this.quit, this.start);
+        this.userInterface.bindHandlers(this.changeDirection, this.quit, this.start, this.handleGameStart);
 
         this.userInterface.render();
     }
+
+    handleGameStart = () => {
+        this.userInterface.gameContainer = this.userInterface.blessed.box(this.userInterface.gameBox);
+
+        this.userInterface.clearScreen();
+        this.start();
+    };
 
     init = () => {
         this.snake = [];
@@ -49,19 +56,19 @@ export class Game {
         return Math.round(Math.random() * (max - min) + min);
     };
 
-    drawSnake() {
+    drawSnake = () => {
         // Render each snake segment as a pixel
         this.snake.forEach((segment) => {
             this.userInterface.draw(segment, SNAKE_COLOR);
         });
-    }
+    };
 
-    drawPoint() {
+    drawPoint = () => {
         // Render the dot as a pixel
         this.userInterface.draw(this.point, POINT_COLOR);
-    }
+    };
 
-    moveSnake() {
+    moveSnake = () => {
         if (this.isChangingDirection) {
             return;
         }
@@ -85,7 +92,7 @@ export class Game {
             // Otherwise, slither
             this.snake.pop();
         }
-    }
+    };
 
     changeDirection = (_: Event, key: { name: string }) => {
         if ((key.name === DIRECTION.UP || key.name === 'w') && this.currentDirection !== DIRECTION.DOWN) {
@@ -102,7 +109,7 @@ export class Game {
         }
     };
 
-    isGameOver() {
+    isGameOver = () => {
         // If the snake collides with itself, end the game
         const isColliding = this.snake
             // Filter out the head
@@ -121,7 +128,7 @@ export class Game {
             // Bottom wall
             this.snake[0].y <= -1
         );
-    }
+    };
 
     tick = () => {
         if (this.isGameOver()) {
@@ -168,10 +175,10 @@ export class Game {
         }
     };
 
-    showGameOverScreen() {
+    showGameOverScreen = () => {
         this.userInterface.gameOverScreen();
         this.userInterface.render();
-    }
+    };
 
     quit = () => {
         process.exit(0);
