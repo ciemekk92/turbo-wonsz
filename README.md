@@ -1,24 +1,24 @@
-### Turbo Wonsz
+## Turbo Wonsz
 
-#### Jak zainstalować?
+### Jak zainstalować?
 
-##### Wymagane oprogramowanie:
+#### Wymagane oprogramowanie:
 
 -   Node.js v. >= 10.24.1
 -   npm v. >= 6.14.12
 
-#### Jak uruchomić?
+### Jak uruchomić?
 
 W głównym folderze projektu nalezy uruchomić komendę `npm run start`
 
-#### Jak grać?
+### Jak grać?
 Sterować wężem można posługując się klawiszami `WSAD` lub strzałkami.
 
-#### Opcje
+### Opcje
 Dostępne w menu opcje: 
 
-###### Tryb trudny
+##### Tryb trudny
 Za każdym zjedzeniem glutka, wąż przyspiesza, i to dość znacznie ;)
 
-###### Kolory
+##### Kolory
 Możemy wybrać jeden z trzech dostępnych kolorów zarówno dla węża jak i dla jedzenia.
