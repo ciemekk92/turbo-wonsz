@@ -15,3 +15,5 @@ export enum DIRECTION {
 export const AVAILABLE_COLORS = ['green', 'yellow', 'red'];
 
 export const INITIAL_SNAKE_SIZE = 6;
+
+export const DEFAULT_GAME_SPEED = 75;

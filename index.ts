@@ -4,6 +4,7 @@ import {
   DIRECTION,
   DIRECTIONS,
   INITIAL_SNAKE_SIZE,
+  DEFAULT_GAME_SPEED,
   Point,
   SnakeSegmentCoord
 } from './src/fixtures';
@@ -15,7 +16,9 @@ let snake: SnakeSegmentCoord[] = [];
 let timer: ReturnType<typeof setInterval> | null = null;
 let point: Point = { x: 0, y: 0 };
 let score: number = 0;
-let gameSpeed: number = 75;
+let hasObstacles: boolean = false;
+let obstacles: Point[] = [];
+let gameSpeed: number = DEFAULT_GAME_SPEED;
 let isHardMode: boolean = false;
 let snakeColor: string = 'green';
 let foodColor: string = 'red';
@@ -83,17 +86,24 @@ const reset = () => {
   timer = null;
 
   createPoint();
+  createObstacles();
   resetScore();
   render();
 };
 
 const isGameOver = () => {
+  // Is snake's head colliding with any other body segment
   const isColliding = snake
     .filter((_: SnakeSegmentCoord, i: number) => i > 0)
     .some((segment) => segment.x === snake[0].x && segment.y === snake[0].y);
 
+  const isHittingObstacle = () => {
+    return obstacles.filter((obs) => obs.x === snake[0].x && obs.y === snake[0].y).length > 0;
+  };
+
   return (
     isColliding ||
+    isHittingObstacle() ||
     // Right wall
     snake[0].x >= (gameContainer.width as number) - 1 ||
     // Left wall
@@ -188,8 +198,11 @@ const moveSnake = () => {
 const tick = () => {
   if (isGameOver()) {
     showGameOverScreen();
+    obstacles = [];
     clearInterval(timer as ReturnType<typeof setInterval>);
     timer = null;
+
+    gameSpeed = DEFAULT_GAME_SPEED;
 
     return;
   }
@@ -197,6 +210,10 @@ const tick = () => {
   isChangingDirection = false;
   clearScreen();
   drawPoint();
+  if (hasObstacles) {
+    drawObstacles();
+  }
+
   moveSnake();
   drawSnake();
   render();
@@ -230,9 +247,31 @@ const init = () => {
   score = 0;
 };
 
+const createObstacles = () => {
+  for (let i = 0; i < 10; i++) {
+    const obstacle = {
+      x: generateRandomCoord(0, screen.width as number) - 1,
+      y: generateRandomCoord(1, (screen.height as number) - 1)
+    };
+    obstacles.push(obstacle);
+  }
+};
+
+const drawObstacles = () => {
+  obstacles.forEach((obstacle: Point) => draw(obstacle, 'white'));
+};
+
 const createPoint = () => {
   point.x = generateRandomCoord(0, (gameContainer.width as number) - 1);
   point.y = generateRandomCoord(1, (gameContainer.height as number) - 1);
+
+  if (hasObstacles) {
+    obstacles.forEach((obstacle: Point) => {
+      if (obstacle.x === point.x && obstacle.y === point.y) {
+        createPoint();
+      }
+    });
+  }
 
   snake.forEach((segment: SnakeSegmentCoord) => {
     if (segment.x === point.x && segment.y === point.y) {
@@ -369,13 +408,30 @@ const showOptionsScreen = () => {
     parent: optionsForm,
     top: 6,
     left: 5,
+    content: 'Przeszkody'
+  });
+
+  const hasObstaclesChechbox = blessed.checkbox({
+    parent: optionsForm,
+    checked: hasObstacles,
+    mouse: true,
+    name: 'hasObstacles',
+    content: 'Zaznacz, aby aktywować',
+    top: 6,
+    left: 34
+  });
+
+  const label3 = blessed.text({
+    parent: optionsForm,
+    top: 9,
+    left: 5,
     content: 'Kolor węża'
   });
 
   const radioSet1 = blessed.radioset({
     parent: optionsForm,
     width: '100%',
-    top: 6,
+    top: 9,
     left: 19
   });
 
@@ -406,9 +462,9 @@ const showOptionsScreen = () => {
     mouse: true
   });
 
-  const label3 = blessed.text({
+  const label4 = blessed.text({
     parent: optionsForm,
-    top: 9,
+    top: 12,
     left: 5,
     content: 'Kolor jedzenia'
   });
@@ -416,7 +472,7 @@ const showOptionsScreen = () => {
   const radioSet2 = blessed.radioset({
     parent: optionsForm,
     width: '100%',
-    top: 9,
+    top: 12,
     left: 19
   });
 
@@ -452,7 +508,7 @@ const showOptionsScreen = () => {
     name: 'submit',
     content: 'Zapisz',
     mouse: true,
-    top: 25,
+    top: 28,
     left: 10,
     shrink: true,
     padding: {
@@ -476,7 +532,7 @@ const showOptionsScreen = () => {
     name: 'submit',
     content: 'Anuluj',
     mouse: true,
-    top: 25,
+    top: 28,
     left: 20,
     shrink: true,
     padding: {
@@ -500,7 +556,12 @@ const showOptionsScreen = () => {
 
   optionsForm.on(
     'submit',
-    (data: { hardMode: boolean; snakeColor: boolean[] | boolean; foodColor: boolean[] | boolean }) => {
+    (data: {
+      hardMode: boolean;
+      hasObstacles: boolean;
+      snakeColor: boolean[] | boolean;
+      foodColor: boolean[] | boolean;
+    }) => {
       const snakeColorIndex = Array.isArray(data.snakeColor) ? (data.snakeColor.length === 2 ? 1 : 0) : 2;
       const foodColorIndex = Array.isArray(data.foodColor) ? (data.foodColor.length === 2 ? 1 : 0) : 2;
 
@@ -512,7 +573,12 @@ const showOptionsScreen = () => {
       } else {
         isHardMode = false;
       }
-      4;
+
+      if (data.hasObstacles) {
+        hasObstacles = true;
+      } else {
+        hasObstacles = false;
+      }
     }
   );
 

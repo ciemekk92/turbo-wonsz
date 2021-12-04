@@ -1,13 +1,8 @@
-export interface UI {}
-
-export interface SnakeSegmentCoord {
-    x: number;
-    y: number;
-}
+export interface SnakeSegmentCoord extends Point {}
 
 export interface Point {
-    x: number;
-    y: number;
+  x: number;
+  y: number;
 }
 
 export type EmptyObject = {};
